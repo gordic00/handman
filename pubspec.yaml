@@ -1,0 +1,37 @@
+name: handman
+description: "Handman new edition."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio:
+  get_it:
+  dartz:
+  logger:
+  shared_preferences: ^2.3.5
+  flutter_svg:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+      - assets/fonts/
+      - assets/vectors/
+      - assets/images/
+      - assets/icon/
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_logo.png"
+
+
