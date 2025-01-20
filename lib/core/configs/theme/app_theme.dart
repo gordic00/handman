@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   static final appTheme = ThemeData(
-      primaryColor: Colors.lightBlue,
+      primaryColor: Color(0xff3B4054),
       scaffoldBackgroundColor: Colors.lightBlue,
       brightness: Brightness.light,
       snackBarTheme: const SnackBarThemeData(

@@ -55,31 +55,36 @@ class _SigninPageState extends State<SigninPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: SafeArea(
-          minimum: const EdgeInsets.only(top: 100, right: 16, left: 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _signin(),
-              const SizedBox(
-                height: 50,
-              ),
-              EmailFieldWidget(emailCon: _usernameCon),
-              const SizedBox(
-                height: 20,
-              ),
-              PasswordFieldWidget(passCon: _passwordCon),
-              // _password(),
-              const SizedBox(
-                height: 60,
-              ),
-              _createAccountButton(),
-              const SizedBox(
-                height: 20,
-              ),
-              _signupText(context)
-            ],
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: SafeArea(
+            minimum: const EdgeInsets.only(top: 100, right: 16, left: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _signin(),
+                const SizedBox(
+                  height: 50,
+                ),
+                EmailFieldWidget(emailCon: _usernameCon),
+                const SizedBox(
+                  height: 20,
+                ),
+                PasswordFieldWidget(passCon: _passwordCon),
+                // _password(),
+                const SizedBox(
+                  height: 60,
+                ),
+                _createAccountButton(),
+                const SizedBox(
+                  height: 20,
+                ),
+                _signupText(context)
+              ],
+            ),
           ),
         ),
       ),
