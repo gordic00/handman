@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:handman/core/assets/app_vectors.dart';
 import 'package:handman/core/helper/app_navigator.dart';
-import 'package:handman/presentation/home/widgets/bottom_navigation_bar.dart';
 import 'package:handman/presentation/home/widgets/drawer.dart';
 import 'package:handman/presentation/home/widgets/home_column_list.dart';
 
@@ -15,15 +14,50 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<Widget> pageList = [];
+  int selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    pageList = _populatePageList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBar(),
       drawer: DrawerWidget(),
-      body: Expanded(
-        child: HomeColumnListWidget(search: widget.search),
+      body: pageList[selectedIndex], // Fixed here
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: selectedIndex,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.black,
+        backgroundColor: Colors.blueAccent,
+        iconSize: 24.0,
+        type: BottomNavigationBarType.fixed,
+        onTap: _onItemTapped,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: '',
+          ),
+        ],
       ),
-      bottomNavigationBar: BottomNavigationBarWidget(),
     );
   }
 
@@ -49,10 +83,9 @@ class _HomePageState extends State<HomePage> {
         GestureDetector(
           onTap: () {
             AppNavigator.pushReplacement(
-                context,
-                HomePage(
-                  search: '',
-                )); //change to notification page when created.
+              context,
+              HomePage(search: ''),
+            ); // Change to notification page when created.
           },
           child: Container(
             margin: const EdgeInsets.all(15),
@@ -67,5 +100,15 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
+  }
+
+  List<Widget> _populatePageList() {
+    return [
+      HomeColumnListWidget(search: widget.search),
+      Container(),
+      Center(
+        child: Text('asdasdf'),
+      ),
+    ];
   }
 }
