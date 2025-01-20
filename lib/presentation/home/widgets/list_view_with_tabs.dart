@@ -17,10 +17,16 @@ class _ListViewWithTabsState extends State<ListViewWithTabs>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  final Map<int, ScrollController> _scrollControllers = {};
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    for (int i = 0; i < 2; i++) {
+      _scrollControllers[i] = ScrollController();
+    }
   }
 
   @override
@@ -41,16 +47,15 @@ class _ListViewWithTabsState extends State<ListViewWithTabs>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                ListViewWidget(
-                  search: widget.search,
-                  work: true,
-                ),
-                ListViewWidget(
-                  search: widget.search,
-                  work: false,
-                ),
-              ],
+              children: List.generate(2, (index) {
+                return KeepAlive(
+                  child: ListViewWidget(
+                    search: widget.search,
+                    work: index == 0,
+                    scrollController: _scrollControllers[index]!,
+                  ),
+                );
+              }),
             ),
           ),
         ],
@@ -61,6 +66,9 @@ class _ListViewWithTabsState extends State<ListViewWithTabs>
   @override
   void dispose() {
     _tabController.dispose();
+    for (var controller in _scrollControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 }
@@ -68,48 +76,50 @@ class _ListViewWithTabsState extends State<ListViewWithTabs>
 class ListViewWidget extends StatefulWidget {
   final String search;
   final bool work;
+  final ScrollController scrollController;
 
-  const ListViewWidget({super.key, required this.search, required this.work});
+  const ListViewWidget({
+    super.key,
+    required this.search,
+    required this.work,
+    required this.scrollController,
+  });
 
   @override
   State<ListViewWidget> createState() => _ListViewWidgetState();
 }
 
-class _ListViewWidgetState extends State<ListViewWidget> {
-  final ScrollController _scrollController = ScrollController();
+class _ListViewWidgetState extends State<ListViewWidget>
+    with AutomaticKeepAliveClientMixin {
   final testService = sl<TestService>();
   List<TestItem> items = [];
   int page = 0;
   bool isLoading = false;
   final int size = 20;
-  double _previousScrollPosition = 0.0;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _fetchItems();
-    _scrollController.addListener(_onScroll);
+    widget.scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
-    final currentPosition = _scrollController.position.pixels;
-    final maxScrollExtent = _scrollController.position.maxScrollExtent;
-
-    if (currentPosition > _previousScrollPosition &&
-        currentPosition >= maxScrollExtent - 200 &&
+    if (widget.scrollController.position.pixels >=
+            widget.scrollController.position.maxScrollExtent - 200 &&
         !isLoading) {
       _fetchItems();
     }
-
-    _previousScrollPosition = currentPosition > _previousScrollPosition
-        ? currentPosition
-        : _previousScrollPosition;
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ListView.builder(
-      controller: _scrollController,
+      controller: widget.scrollController,
       itemCount: items.length + (isLoading ? 1 : 0),
       itemBuilder: (context, index) {
         if (index < items.length) {
@@ -145,16 +155,15 @@ class _ListViewWidgetState extends State<ListViewWidget> {
   Future<void> _fetchItems() async {
     if (isLoading) return;
 
-    _setIsLoading(true);
+    setState(() {
+      isLoading = true;
+    });
 
     try {
-      final results = widget.work
-          ? await testService.load(
-              LoadReqParams(search: widget.search, page: page, size: size),
-            )
-          : await testService.load(
-              LoadReqParams(search: widget.search, page: page, size: size),
-            );
+      final results = await testService.load(
+        LoadReqParams(search: widget.search, page: page, size: size),
+      );
+
       setState(() {
         items.addAll(results);
         page++;
@@ -166,21 +175,36 @@ class _ListViewWidgetState extends State<ListViewWidget> {
         );
       }
     } finally {
-      _setIsLoading(false);
+      setState(() {
+        isLoading = false;
+      });
     }
-  }
-
-  void _setIsLoading(bool value) {
-    if (!mounted) return;
-    setState(() {
-      isLoading = value;
-    });
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    widget.scrollController.removeListener(_onScroll);
     super.dispose();
+  }
+}
+
+class KeepAlive extends StatefulWidget {
+  final Widget child;
+
+  const KeepAlive({super.key, required this.child});
+
+  @override
+  State<KeepAlive> createState() => _KeepAliveState();
+}
+
+class _KeepAliveState extends State<KeepAlive>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
